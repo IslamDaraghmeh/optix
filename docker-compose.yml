@@ -1,0 +1,158 @@
+version: "3.8"
+
+services:
+  # MySQL Database for Optix2
+  mysql_optix2:
+    image: mysql:8.0
+    container_name: optix_mysql_optix2
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: optix_clinic
+      MYSQL_USER: optix_user
+      MYSQL_PASSWORD: optix_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_optix2_data:/var/lib/mysql
+      - ./optix2/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./optix2/database/seeds/001_locations.sql:/docker-entrypoint-initdb.d/02-locations.sql:ro
+      - ./optix2/database/seeds/002_users.sql:/docker-entrypoint-initdb.d/03-users.sql:ro
+      - ./optix2/database/seeds/003_sample_data.sql:/docker-entrypoint-initdb.d/04-sample.sql:ro
+    networks:
+      - optix_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MySQL Database for Laravel CRM
+  mysql_crm:
+    image: mysql:8.0
+    container_name: optix_mysql_crm
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: optical_crm
+      MYSQL_USER: crm_user
+      MYSQL_PASSWORD: crm_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_crm_data:/var/lib/mysql
+    networks:
+      - optix_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-prootpassword",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: optix_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./CRM/optical-crm/public:/var/www/html/crm/public:ro
+      - ./CRM/optical-crm:/var/www/html/crm:ro
+      - ./optix2/public:/var/www/html/optix2/public:ro
+      - ./optix2:/var/www/html/optix2:ro
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - crm_php
+      - optix2_php
+    networks:
+      - optix_network
+
+  # Laravel CRM PHP-FPM
+  crm_php:
+    build:
+      context: ./CRM/optical-crm
+      dockerfile: Dockerfile
+    container_name: optix_crm_php
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./CRM/optical-crm:/var/www/html
+      - ./CRM/optical-crm/storage:/var/www/html/storage
+      - ./CRM/optical-crm/bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      - APP_NAME=OpticalCRM
+      - APP_ENV=production
+      - APP_KEY=
+      - APP_DEBUG=false
+      - APP_URL=http://crm.localhost
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql_crm
+      - DB_PORT=3306
+      - DB_DATABASE=optical_crm
+      - DB_USERNAME=crm_user
+      - DB_PASSWORD=crm_password
+    depends_on:
+      mysql_crm:
+        condition: service_healthy
+    networks:
+      - optix_network
+
+  # Optix2 PHP-FPM
+  optix2_php:
+    build:
+      context: ./optix2
+      dockerfile: Dockerfile
+    container_name: optix2_php
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./optix2:/var/www/html
+      - ./optix2/storage:/var/www/html/storage
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mysql_optix2
+      - DB_PORT=3306
+      - DB_DATABASE=optix_clinic
+      - DB_USERNAME=optix_user
+      - DB_PASSWORD=optix_password
+      - DB_CHARSET=utf8mb4
+      - DB_COLLATION=utf8mb4_unicode_ci
+    depends_on:
+      mysql_optix2:
+        condition: service_healthy
+    networks:
+      - optix_network
+
+volumes:
+  mysql_optix2_data:
+    driver: local
+  mysql_crm_data:
+    driver: local
+
+networks:
+  optix_network:
+    driver: bridge

@@ -1,0 +1,15 @@
+/vendor
+/node_modules
+.env
+.env.backup
+.env.production
+storage/logs/*
+storage/uploads/*
+storage/cache/*
+!.gitkeep
+.gitignore
+.gitattributes
+/.idea
+/.vscode
+/.git
+
