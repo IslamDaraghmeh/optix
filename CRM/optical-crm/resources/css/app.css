@@ -1,0 +1,275 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables and Global Styles */
+:root {
+    /* Primary Colors - Teal/Green Palette */
+    --color-primary-50: #F5F9F9;   /* G 4 - Almost pure white */
+    --color-primary-100: #F0F5F6;  /* G 6 - Almost pure white with subtle grey */
+    --color-primary-200: #EBF2F3;  /* G 8 - Extremely pale off-white */
+    --color-primary-300: #E5EEEF;  /* G 10 - Extremely pale off-white with subtle blue/grey */
+    --color-primary-400: #D5E4E6;  /* G 16 - Very pale light blue-grey */
+    --color-primary-500: #99BDC1;  /* G 40 - Light muted blue-grey */
+    --color-primary-600: #70A2A7;  /* G 56 - Lighter muted blue-green */
+    --color-primary-700: #47878E;  /* G 72 - Medium muted teal-blue */
+    --color-primary-800: #1F6C75;  /* G 88 - Dark muted teal-blue */
+    --color-primary-900: #015D67;  /* Forest Green - Dark rich teal-green */
+    --color-primary-950: #00ACB1;  /* Kelly Green - Vibrant bright teal */
+
+    /* Secondary Colors - Neutral Palette */
+    --color-secondary-50: #F5F9F9;   /* G 4 - Almost pure white */
+    --color-secondary-100: #F0F5F6;  /* G 6 - Almost pure white with subtle grey */
+    --color-secondary-200: #EBF2F3;  /* G 8 - Extremely pale off-white */
+    --color-secondary-300: #E5EEEF;  /* G 10 - Extremely pale off-white */
+    --color-secondary-400: #D5E4E6;  /* G 16 - Very pale light blue-grey */
+    --color-secondary-500: #ADC9CD;  /* G 32 - Very light pale blue-grey */
+    --color-secondary-600: #99BDC1;  /* G 40 - Light muted blue-grey */
+    --color-secondary-700: #70A2A7;  /* G 56 - Lighter muted blue-green */
+    --color-secondary-800: #47878E;  /* G 72 - Medium muted teal-blue */
+    --color-secondary-900: #1F6C75;  /* G 88 - Dark muted teal-blue */
+    --color-secondary-950: #015D67;  /* Forest Green - Dark rich teal-green */
+
+    /* Accent Colors - Mint/Teal Highlights */
+    --color-accent-500: #87E4DB;  /* Mint - Very light pastel mint green */
+    --color-accent-600: #70A2A7;  /* G 56 - Lighter muted blue-green */
+    --color-accent-700: #47878E;  /* G 72 - Medium muted teal-blue */
+
+    /* Status Colors */
+    --color-success-500: #22c55e;
+    --color-warning-500: #f59e0b;
+    --color-error-500: #ef4444;
+}
+
+/* Base Typography */
+@layer base {
+    html {
+        font-family: 'Inter', 'Cairo', system-ui, sans-serif;
+    }
+
+    [lang="ar"] {
+        font-family: 'Cairo', 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+        color: var(--color-secondary-800);
+        background-color: #ffffff;
+    }
+}
+
+/* Component Styles */
+@layer components {
+    /* Button Styles */
+    .btn-primary {
+        @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-1;
+    }
+
+    .btn-secondary {
+        @apply bg-secondary-500 hover:bg-secondary-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-1;
+    }
+
+    .btn-accent {
+        @apply bg-accent-500 hover:bg-accent-600 text-white font-medium py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-1;
+    }
+
+    /* Input Styles */
+    .input-primary {
+        @apply border-primary-300 focus:border-primary-500 focus:ring-primary-500 rounded-lg;
+    }
+
+    /* Card Styles */
+    .card {
+        @apply bg-white rounded-2xl shadow-lg border-2 border-primary-200 p-6;
+    }
+
+    .card-hover {
+        @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:border-primary-300;
+    }
+
+    /* Typography Classes */
+    .text-display {
+        @apply font-display text-primary-900;
+    }
+
+    .text-body {
+        @apply font-body text-primary-800;
+    }
+
+    .text-muted {
+        @apply text-primary-600;
+    }
+}
+
+/* Utility Classes */
+@layer utilities {
+    .text-primary {
+        color: var(--color-primary-600);
+    }
+
+    .bg-primary-solid {
+        background-color: var(--color-primary-500);
+    }
+
+    .bg-secondary-solid {
+        background-color: var(--color-secondary-500);
+    }
+
+    .bg-accent-solid {
+        background-color: var(--color-accent-500);
+    }
+
+    /* RTL Support - Table Alignment */
+    [dir="rtl"] .text-left {
+        text-align: right;
+    }
+
+    [dir="rtl"] .text-right {
+        text-align: left;
+    }
+
+    [dir="ltr"] .text-left {
+        text-align: left;
+    }
+
+    [dir="ltr"] .text-right {
+        text-align: right;
+    }
+
+    /* RTL Support - Flex Alignment */
+    [dir="rtl"] .justify-end {
+        justify-content: flex-start;
+    }
+
+    [dir="rtl"] .justify-start {
+        justify-content: flex-end;
+    }
+
+    [dir="rtl"] .items-end {
+        align-items: flex-start;
+    }
+
+    [dir="rtl"] .items-start {
+        align-items: flex-end;
+    }
+
+    /* RTL Support - Margins and Padding */
+    [dir="rtl"] .mr-1 {
+        margin-right: 0;
+        margin-left: 0.25rem;
+    }
+
+    [dir="rtl"] .mr-2 {
+        margin-right: 0;
+        margin-left: 0.5rem;
+    }
+
+    [dir="rtl"] .mr-3 {
+        margin-right: 0;
+        margin-left: 0.75rem;
+    }
+
+    [dir="rtl"] .mr-4 {
+        margin-right: 0;
+        margin-left: 1rem;
+    }
+
+    [dir="rtl"] .ml-1 {
+        margin-left: 0;
+        margin-right: 0.25rem;
+    }
+
+    [dir="rtl"] .ml-2 {
+        margin-left: 0;
+        margin-right: 0.5rem;
+    }
+
+    [dir="rtl"] .ml-3 {
+        margin-left: 0;
+        margin-right: 0.75rem;
+    }
+
+    [dir="rtl"] .ml-4 {
+        margin-left: 0;
+        margin-right: 1rem;
+    }
+
+    [dir="rtl"] .pr-1 {
+        padding-right: 0;
+        padding-left: 0.25rem;
+    }
+
+    [dir="rtl"] .pr-2 {
+        padding-right: 0;
+        padding-left: 0.5rem;
+    }
+
+    [dir="rtl"] .pr-3 {
+        padding-right: 0;
+        padding-left: 0.75rem;
+    }
+
+    [dir="rtl"] .pr-4 {
+        padding-right: 0;
+        padding-left: 1rem;
+    }
+
+    [dir="rtl"] .pl-1 {
+        padding-left: 0;
+        padding-right: 0.25rem;
+    }
+
+    [dir="rtl"] .pl-2 {
+        padding-left: 0;
+        padding-right: 0.5rem;
+    }
+
+    [dir="rtl"] .pl-3 {
+        padding-left: 0;
+        padding-right: 0.75rem;
+    }
+
+    [dir="rtl"] .pl-4 {
+        padding-left: 0;
+        padding-right: 1rem;
+    }
+
+    /* RTL Support - Space Between */
+    [dir="rtl"] .space-x-1 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-x-reverse: 1;
+        margin-right: calc(0.25rem * var(--tw-space-x-reverse));
+        margin-left: calc(0.25rem * calc(1 - var(--tw-space-x-reverse)));
+    }
+
+    [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-x-reverse: 1;
+        margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+        margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
+    }
+
+    [dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-x-reverse: 1;
+        margin-right: calc(0.75rem * var(--tw-space-x-reverse));
+        margin-left: calc(0.75rem * calc(1 - var(--tw-space-x-reverse)));
+    }
+
+    [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+        --tw-space-x-reverse: 1;
+        margin-right: calc(1rem * var(--tw-space-x-reverse));
+        margin-left: calc(1rem * calc(1 - var(--tw-space-x-reverse)));
+    }
+
+    /* RTL Support - Rounded Corners */
+    [dir="rtl"] .rounded-l {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-top-right-radius: 0.25rem;
+        border-bottom-right-radius: 0.25rem;
+    }
+
+    [dir="rtl"] .rounded-r {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-top-left-radius: 0.25rem;
+        border-bottom-left-radius: 0.25rem;
+    }
+}
