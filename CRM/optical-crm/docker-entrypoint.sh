@@ -1,13 +1,25 @@
 #!/bin/sh
 set -e
 
+# Get database credentials from environment
+DB_USER=${DB_USERNAME:-crm_user}
+DB_PASS=${DB_PASSWORD:-CHANGE_THIS_PASSWORD}
+DB_HOST=${DB_HOST:-mysql_crm}
+DB_PORT=${DB_PORT:-3306}
+
 echo "Waiting for MySQL to be ready..."
-until php -r "try { new PDO('mysql:host=mysql_crm;port=3306', 'crm_user', 'crm_password'); echo 'Connected'; exit(0); } catch (PDOException \$e) { exit(1); }" 2>/dev/null; do
+until php -r "try { new PDO('mysql:host=$DB_HOST;port=$DB_PORT', '$DB_USER', '$DB_PASS'); echo 'Connected'; exit(0); } catch (PDOException \$e) { exit(1); }" 2>/dev/null; do
   echo "MySQL is unavailable - sleeping"
   sleep 2
 done
 
 echo "MySQL is up - executing commands"
+
+# Generate APP_KEY if not set
+if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
+  echo "Generating Laravel APP_KEY..."
+  php artisan key:generate --force
+fi
 
 # Clear and cache config
 php artisan config:clear

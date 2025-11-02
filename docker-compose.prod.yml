@@ -1,7 +1,15 @@
 version: "3.8"
 
-# IMPORTANT: Create .env file with all required variables before starting
-# Copy .env.example to .env and fill in all values
+# PRODUCTION CONFIGURATION
+#
+# IMPORTANT: Before using this file:
+# 1. Copy .env.example files and configure all values
+# 2. Change ALL default passwords
+# 3. Generate Laravel APP_KEY
+# 4. Configure SSL certificates
+# 5. Update domain names
+#
+# Usage: docker-compose -f docker-compose.prod.yml up -d
 
 services:
   # MySQL Database for Optix2
@@ -10,12 +18,13 @@ services:
     container_name: optix_mysql_optix2
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_OPTIX2:-CHANGE_THIS_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_OPTIX2}
       MYSQL_DATABASE: ${DB_DATABASE_OPTIX2:-optix_clinic}
       MYSQL_USER: ${DB_USERNAME_OPTIX2:-optix_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD_OPTIX2:-CHANGE_THIS_PASSWORD}
-    ports:
-      - "3306:3306"
+      MYSQL_PASSWORD: ${DB_PASSWORD_OPTIX2}
+    # Port NOT exposed externally - only accessible within Docker network
+    expose:
+      - "3306"
     volumes:
       - mysql_optix2_data:/var/lib/mysql
       - ./optix2/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -34,11 +43,19 @@ services:
           "localhost",
           "-u",
           "root",
-          "-p${MYSQL_ROOT_PASSWORD_OPTIX2:-CHANGE_THIS_PASSWORD}",
+          "-p${MYSQL_ROOT_PASSWORD_OPTIX2}",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 
   # MySQL Database for Laravel CRM
   mysql_crm:
@@ -46,12 +63,13 @@ services:
     container_name: optix_mysql_crm
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_CRM:-CHANGE_THIS_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_CRM}
       MYSQL_DATABASE: ${DB_DATABASE_CRM:-optical_crm}
       MYSQL_USER: ${DB_USERNAME_CRM:-crm_user}
-      MYSQL_PASSWORD: ${DB_PASSWORD_CRM:-CHANGE_THIS_PASSWORD}
-    ports:
-      - "3307:3306"
+      MYSQL_PASSWORD: ${DB_PASSWORD_CRM}
+    # Port NOT exposed externally - only accessible within Docker network
+    expose:
+      - "3306"
     volumes:
       - mysql_crm_data:/var/lib/mysql
     networks:
@@ -66,11 +84,19 @@ services:
           "localhost",
           "-u",
           "root",
-          "-p${MYSQL_ROOT_PASSWORD_CRM:-CHANGE_THIS_PASSWORD}",
+          "-p${MYSQL_ROOT_PASSWORD_CRM}",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
 
   # Nginx Web Server
   nginx:
@@ -84,15 +110,23 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - ./CRM/optical-crm/public:/var/www/html/crm/public:ro
-      - ./CRM/optical-crm:/var/www/html/crm:ro
       - ./optix2/public:/var/www/html/optix2/public:ro
-      - ./optix2:/var/www/html/optix2:ro
       - ./nginx/logs:/var/log/nginx
     depends_on:
       - crm_php
       - optix2_php
     networks:
       - optix_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Laravel CRM PHP-FPM
   crm_php:
@@ -106,23 +140,33 @@ services:
       - ./CRM/optical-crm:/var/www/html
       - ./CRM/optical-crm/storage:/var/www/html/storage
       - ./CRM/optical-crm/bootstrap/cache:/var/www/html/bootstrap/cache
+    env_file:
+      - ./CRM/optical-crm/.env
     environment:
-      - APP_NAME=${APP_NAME:-OpticalCRM}
-      - APP_ENV=${APP_ENV:-production}
-      - APP_KEY=${APP_KEY:-}
-      - APP_DEBUG=${APP_DEBUG:-false}
-      - APP_URL=${APP_URL:-http://localhost}
       - DB_CONNECTION=mysql
       - DB_HOST=mysql_crm
       - DB_PORT=3306
       - DB_DATABASE=${DB_DATABASE_CRM:-optical_crm}
       - DB_USERNAME=${DB_USERNAME_CRM:-crm_user}
-      - DB_PASSWORD=${DB_PASSWORD_CRM:-CHANGE_THIS_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD_CRM}
     depends_on:
       mysql_crm:
         condition: service_healthy
     networks:
       - optix_network
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # Optix2 PHP-FPM
   optix2_php:
@@ -135,14 +179,14 @@ services:
     volumes:
       - ./optix2:/var/www/html
       - ./optix2/storage:/var/www/html/storage
+    env_file:
+      - ./optix2/.env
     environment:
-      - APP_ENV=${APP_ENV:-production}
-      - APP_DEBUG=${APP_DEBUG:-false}
       - DB_HOST=mysql_optix2
       - DB_PORT=3306
       - DB_DATABASE=${DB_DATABASE_OPTIX2:-optix_clinic}
       - DB_USERNAME=${DB_USERNAME_OPTIX2:-optix_user}
-      - DB_PASSWORD=${DB_PASSWORD_OPTIX2:-CHANGE_THIS_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD_OPTIX2}
       - DB_CHARSET=utf8mb4
       - DB_COLLATION=utf8mb4_unicode_ci
     depends_on:
@@ -150,6 +194,19 @@ services:
         condition: service_healthy
     networks:
       - optix_network
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   mysql_optix2_data:
