@@ -12,7 +12,9 @@ RUN apk add --no-cache \
     libxml2-dev \
     freetype-dev \
     libjpeg-turbo-dev \
-    mysql-client
+    mysql-client \
+    icu-dev \
+    icu-libs
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
