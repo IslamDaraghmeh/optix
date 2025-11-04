@@ -15,10 +15,15 @@ done
 
 echo "MySQL is up - executing commands"
 
-# Wait for vendor directory to exist (composer install should have run)
+# Check if vendor directory exists, if not install dependencies
 if [ ! -f "/var/www/html/vendor/autoload.php" ]; then
-  echo "Warning: vendor/autoload.php not found. Running composer install..."
+  echo "vendor/autoload.php not found. Installing dependencies..."
+  cd /var/www/html
   composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+  if [ $? -ne 0 ]; then
+    echo "ERROR: composer install failed!"
+    exit 1
+  fi
 fi
 
 # Generate APP_KEY if not set
