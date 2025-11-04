@@ -15,6 +15,12 @@ done
 
 echo "MySQL is up - executing commands"
 
+# Wait for vendor directory to exist (composer install should have run)
+if [ ! -f "/var/www/html/vendor/autoload.php" ]; then
+  echo "Warning: vendor/autoload.php not found. Running composer install..."
+  composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+fi
+
 # Generate APP_KEY if not set
 if [ -z "$APP_KEY" ] || [ "$APP_KEY" = "" ]; then
   echo "Generating Laravel APP_KEY..."
