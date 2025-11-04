@@ -28,7 +28,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     zip \
     opcache \
     xml \
-    intl \
     curl
 
 # Install Composer
