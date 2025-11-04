@@ -36,14 +36,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files
+# Copy composer files first (for dependency caching)
 COPY composer.json composer.lock ./
+
+# Copy application files (needed for artisan command in post-install scripts)
+COPY . .
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-
-# Copy application files
-COPY . .
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
